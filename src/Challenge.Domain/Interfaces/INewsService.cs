@@ -1,5 +1,5 @@
 ﻿using Challenge.Domain.Models;
-using FluentResults;
+using Challenge.Domain.Models.Results;
 
 namespace Challenge.Domain.Interfaces;
 

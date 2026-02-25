@@ -1,10 +1,7 @@
 ﻿using Challenge.Domain.Interfaces;
 using Challenge.Domain.Models;
+using Challenge.Domain.Models.Results;
 using Challenge.Infra.Client;
-using FirebaseAdmin;
-using FirebaseAdmin.Messaging;
-using FluentResults;
-using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Logging;
 
 namespace Challenge.Application.Services;
@@ -23,37 +20,6 @@ public class NewsService : INewsService
         //InitializeFirebase();
     }
 
-    public static void InitializeFirebase()
-    {
-        string path = "path/to/your/serviceAccountKey.json";
-        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
-
-        var app = FirebaseApp.Create(new AppOptions()
-        {
-            Credential = GoogleCredential.FromFile(path)
-        });
-
-        FirebaseMessaging.GetMessaging(app);
-
-
-
-
-    }
-    private async Task SendMessageToTopicAsync(string topicName, string title, string body)
-    {
-        var message = new Message()
-        {
-            Notification = new Notification()
-            {
-                Title = title,
-                Body = body
-            },
-            Topic = topicName
-        };
-
-        string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-    }
-
     public async Task<Result<List<int>>> GetBestStoriesAsync()
     {
         var result = new List<int>();
@@ -67,7 +33,7 @@ public class NewsService : INewsService
             _logger.LogError(ex, ex.Message);
         }
 
-        return Result.Ok(result);
+        return Result<List<int>>.Ok(result);
     }
 
     //CacheAside
@@ -101,11 +67,10 @@ public class NewsService : INewsService
         }
         catch (Exception ex)
         {
-
-            throw;
+            _logger.LogError(ex, ex.Message);
         }
 
-        return Result.Ok(result);
+        return Result<List<News>>.Ok(result);
     }
 
     //CacheAside
@@ -133,11 +98,10 @@ public class NewsService : INewsService
         }
         catch (Exception ex)
         {
-
-            throw;
+            _logger.LogError(ex, ex.Message);
         }
 
-        return Result.Ok(result);
+        return Result<List<News>>.Ok(result);
     }
 
     //Cache aside
@@ -151,9 +115,7 @@ public class NewsService : INewsService
 
             if (cache is null)
             {
-
-
-
+                result = cache.Value;
             }
 
         }
@@ -163,6 +125,6 @@ public class NewsService : INewsService
             throw;
         }
 
-        return Result.Ok(result);
+        return Result<News>.Ok(result);
     }
 }

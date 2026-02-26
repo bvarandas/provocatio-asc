@@ -36,7 +36,8 @@ Explaining the Technology Stack and Patterns:
 
 C4 architecture model
 
-<img width="654" height="1195" alt="image" src="https://github.com/user-attachments/assets/a1500d5f-865b-4347-84d0-fea358aa3cda" />
+<img width="651" height="1192" alt="image" src="https://github.com/user-attachments/assets/c9540753-49a8-4213-beb4-ef3f839904ce" />
+
 
 ---
 

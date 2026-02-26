@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Running;
 using Challenge.Api.Controllers;
 using Challenge.Application.Services;
 using Challenge.Domain.Interfaces;
@@ -12,6 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Challenge.Tests;
 
 [MemoryDiagnoser]
+[TestCaseOrderer("OrdererTypeName", "OrdererAssemblyName")]
 public class NewsCacheHandlerTest : IClassFixture<HachNewsFixture>
 {
     private readonly ILogger<NewsMap> _loggerNewsMap;
@@ -36,15 +36,9 @@ public class NewsCacheHandlerTest : IClassFixture<HachNewsFixture>
     }
 
     [Fact(DisplayName = "Get Main Async Integration Hack News")]
-    public async Task GetAllAsync_MainIntegrationTest()
+    public async Task A_GetAllAsync_MainIntegrationTest()
     {
         Thread.Sleep(10000);
-
-        await GetAllAsync_IntegrationTest();
-
-        await GetAllAsync_BestSotriesIntegrationTest();
-
-        BenchmarkRunner.Run<NewsCacheHandlerTest>();
     }
 
     [Benchmark]

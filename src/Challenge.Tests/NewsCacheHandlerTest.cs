@@ -1,89 +1,86 @@
-﻿//using Challenge.Application.Commands;
-//using Challenge.Application.Handlers;
-//using Challenge.Domain.Bus;
-//using Challenge.Domain.Interfaces;
-//using Microsoft.Extensions.Logging;
+﻿using BenchmarkDotNet.Attributes;
+using Challenge.Api.Controllers;
+using Challenge.Application.Services;
+using Challenge.Domain.Interfaces;
+using Challenge.Domain.Models;
+using Challenge.Infra.Client;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-//namespace Challenge.Tests;
+namespace Challenge.Tests;
 
-//public class NewsCacheHandlerTest
-//{
-//    private readonly Mock<IMediatorHandler> _mockMediatorHandler;
-//    private readonly Mock<INewsCache> _mockNewHackCache;
-//    private readonly Mock<ILogger<NewsCacheHandler>> _mockNewHackLogger;
-//    private readonly Mock<NewsCacheHandler> _newsCacheHandlerMock;
+[MemoryDiagnoser]
+public class NewsCacheHandlerTest : IClassFixture<HachNewsFixture>
+{
+    private readonly ILogger<NewsMap> _loggerNewsMap;
+    private readonly ILogger<NewsService> _loggerNewService;
+    private readonly HackNewsClient _hackNewsClient;
+    private readonly INewsCache _newsCache;
+    private readonly InitialLoadHackNewsWorker _initialLoadHackNews;
+    public NewsCacheHandlerTest(HachNewsFixture fixture)
+    {
+        _newsCache = fixture.serviceProvider.GetService<INewsCache>();
+        _hackNewsClient = fixture.serviceProvider.GetService<HackNewsClient>(); ;
 
-//    private NewsCacheHandler _handler = null!;
-//    public NewsCacheHandlerTest()
-//    {
-//        _mockMediatorHandler = new Mock<IMediatorHandler>();
-//        _mockNewHackCache = new Mock<INewsCache>();
-//        _mockNewHackLogger = new Mock<ILogger<NewsCacheHandler>>();
-//        _newsCacheHandlerMock = new Mock<NewsCacheHandler>();
+        var factory = fixture.serviceProvider.GetService<ILoggerFactory>();
+        _loggerNewService = factory.CreateLogger<NewsService>();
+        _loggerNewsMap = factory.CreateLogger<NewsMap>();
 
-//        _handler = new NewsCacheHandler(_mockNewHackCache.Object,
-//            _mockMediatorHandler.Object,
-//            _mockNewHackLogger.Object);
-//    }
+        _initialLoadHackNews = new InitialLoadHackNewsWorker(factory.CreateLogger<InitialLoadHackNewsWorker>(),
+            _newsCache,
+            _hackNewsClient);
 
-//    [Fact(DisplayName = "Delete news hack with success")]
-//    public async Task Delete_News_Hack_With_Success()
-//    {
-//        var command = new DeleteNewsCache(1);
+        _initialLoadHackNews.StartAsync(CancellationToken.None).ConfigureAwait(true);
+    }
 
-//        var result = _newsCacheHandlerMock.Setup(x => x.HandleRemove(command, default(CancellationToken)))
-//            .ReturnsAsync(false);
+    [Fact(DisplayName = "Get Main Async Integration Hack News")]
+    public async Task GetAllAsync_MainIntegrationTest()
+    {
+        Thread.Sleep(10000);
 
-//        result.Should().Be(true);
-//    }
+        await GetAllAsync_IntegrationTest();
 
-//    [Fact(DisplayName = "Delete news hack with error")]
-//    public async Task Delete_News_Hack_With_Error()
-//    {
-//        var command = new DeleteNewsCache(2);
+        await GetAllAsync_BestSotriesIntegrationTest();
+    }
 
-//        var result = _newsCacheHandlerMock.Setup(x => x.HandleRemove(command, default(CancellationToken))).ReturnsAsync(false);
+    [Benchmark]
+    [Fact(DisplayName = "Get All Async Integration Hack News")]
+    public async Task GetAllAsync_IntegrationTest()
+    {
+        // Arrange
+        INewsService service = new NewsService(_loggerNewService, _newsCache, _hackNewsClient);
+        var controller = new NewsMap();
 
-//        result.Should().Be(false);
-//    }
+        // Act
+        Results<Ok<List<News>>, BadRequest<Exception>> result =
+            await NewsMap.GetAllAsync(service, _loggerNewsMap);
 
-//    [Fact(DisplayName = "Delete news hack with error Null")]
-//    public async Task Delete_News_Hack_With_Error_Null()
-//    {
-//        var command = new DeleteNewsCache(2);
+        // Assert
+        Assert.IsType<Ok<List<News>>>(result.Result);
+    }
 
-//        var result = _newsCacheHandlerMock.Setup(x => x.HandleRemove(command, default(CancellationToken))).ReturnsAsync(false);
+    [Benchmark]
+    [Fact(DisplayName = "Get All Async Best Stories Integration  Hack News")]
+    public async Task GetAllAsync_BestSotriesIntegrationTest()
+    {
+        // Arrange
+        INewsService service = new NewsService(_loggerNewService, _newsCache, _hackNewsClient);
+        var controller = new NewsMap();
 
-//        Assert.NotNull(result);
-//    }
+        // Act
+        var resultBestStories = await _newsCache.GetAllBestStoriesAsync();
+        // Assert
+        var besties = resultBestStories.Value;
+        Ok<News> okResult = null;
 
-//    [Fact(DisplayName = "Insert news hack with success")]
-//    public async Task Insert_News_Hack_With_Success()
-//    {
-//        var command = new InsertNewsCache();
+        foreach (var item in besties)
+        {
+            Results<Ok<News>, BadRequest<Exception>> result = await NewsMap.GetByIdAsync(service, item.ToString(), _loggerNewsMap);
+            okResult = Assert.IsType<Ok<News>>(result.Result);
+        }
 
-//        var result = _newsCacheHandlerMock.Setup(x => x.HandleUpsert(command, default(CancellationToken))).ReturnsAsync(false);
-
-//        result.Should().Be(true);
-//    }
-
-//    [Fact(DisplayName = "Insert news hack with error")]
-//    public async Task Insert_News_Hack_With_Error()
-//    {
-//        var command = new InsertNewsCache();
-
-//        var result = _newsCacheHandlerMock.Setup(x => x.HandleUpsert(command, default(CancellationToken))).ReturnsAsync(false);
-
-//        result.Should().Be(false);
-//    }
-
-//    [Fact(DisplayName = "Insert news hack with error Null")]
-//    public async Task Insert_News_Hack_With_Error_Null()
-//    {
-//        var command = new InsertNewsCache(2);
-
-//        var result = _newsCacheHandlerMock.Setup(x => x.HandleUpsert(command, default(CancellationToken))).ReturnsAsync(false);
-
-//        Assert.NotNull(result);
-//    }
-//}
+        // Assert
+        Assert.NotNull(okResult);
+    }
+}

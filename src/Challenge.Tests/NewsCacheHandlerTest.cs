@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
 using Challenge.Api.Controllers;
 using Challenge.Application.Services;
 using Challenge.Domain.Interfaces;
@@ -42,6 +43,8 @@ public class NewsCacheHandlerTest : IClassFixture<HachNewsFixture>
         await GetAllAsync_IntegrationTest();
 
         await GetAllAsync_BestSotriesIntegrationTest();
+
+        BenchmarkRunner.Run<NewsCacheHandlerTest>();
     }
 
     [Benchmark]

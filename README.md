@@ -21,9 +21,15 @@ Explaining the Technology Stack and Patterns:
 
 **Blazor** - The front-end application was built in Blazor so we could view the news listing. Tech was chosen for its ease of use and ease of integration with SignalR.
 
-**Protobuf** -  For message compression during inter-service transport (Byte Array) - Important for message compression during transport and for better storage and sending via RabbitMQ.
+**ComncurrentDictionay** - 
 
-**DragoFlyDB** - Important for temporarily storing outbox messages since its I/O can handle more than 2K per second. This tool will likely replace Redis in a few months. It's important to note that it accepts transactional writes. For this reason, we opted for this solution since the proposed architectural requirement has a performance characteristic.
+**ComncurrentDictionay** - 
+Dictionary<TKey, TValue> (Generic Dictionary):
+• Add: O(1) on average. O(n) worst-case (hash collision/resize).
+• Remove: O(1) on average. O(n) worst-case.
+• Access (by key): O(1) on average. O(n) worst-case.
+• Contains Key/Value: O(1) on average. O(n) worst-case.
+
 
 **Docker** - To put part of the application, or the entire application, into containers. However, ideally, you should only scale part of the application.
 
@@ -43,9 +49,6 @@ C4 architecture model
 
 Creational Patterns used:
 * Singleton - to use only one instance of each module.
-
-Behavioral Patterns:
-* Mediator 
 
 More Patterns:
 **Dependency Injection** - Injecting dependencies to use object interfaces, decoupling method calls between objects.

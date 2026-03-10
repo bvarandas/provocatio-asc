@@ -1,5 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Challenge.Api.Controllers;
+using Challenge.Application.Dto;
+using Challenge.Application.Interfaces;
 using Challenge.Application.Services;
 using Challenge.Domain.Interfaces;
 using Challenge.Domain.Models;
@@ -50,7 +52,7 @@ public class NewsCacheHandlerTest : IClassFixture<HachNewsFixture>
         var controller = new NewsMap();
 
         // Act
-        Results<Ok<List<News>>, BadRequest<Exception>> result =
+        Results<Ok<List<HackNewsDto>>, BadRequest<Exception>> result =
             await NewsMap.GetAllAsync(service, _loggerNewsMap);
 
         // Assert
@@ -69,12 +71,12 @@ public class NewsCacheHandlerTest : IClassFixture<HachNewsFixture>
         var resultBestStories = await _newsCache.GetAllBestStoriesAsync();
         // Assert
         var besties = resultBestStories.Value;
-        Ok<News> okResult = null;
+        Ok<HackNewsDto> okResult = null;
 
         foreach (var item in besties)
         {
-            Results<Ok<News>, BadRequest<Exception>> result = await NewsMap.GetByIdAsync(service, item.ToString(), _loggerNewsMap);
-            okResult = Assert.IsType<Ok<News>>(result.Result);
+            Results<Ok<HackNewsDto>, BadRequest<Exception>> result = await NewsMap.GetByIdAsync(service, item.ToString(), _loggerNewsMap);
+            okResult = Assert.IsType<Ok<HackNewsDto>>(result.Result);
         }
 
         // Assert

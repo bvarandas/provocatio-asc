@@ -1,5 +1,5 @@
-﻿using Challenge.Domain.Interfaces;
-using Challenge.Domain.Models;
+﻿using Challenge.Application.Dto;
+using Challenge.Application.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,13 +17,13 @@ public class NewsMap
         app.MapGet("api/news/first/{number}", GetByNumberAsync);
     }
 
-    public static async Task<Results<Ok<List<News>>, BadRequest<Exception>>> GetAllAsync([FromServices] INewsService service, ILogger<NewsMap> logger)
+    public static async Task<Results<Ok<List<HackNewsDto>>, BadRequest<Exception>>> GetAllAsync([FromServices] INewsService service, ILogger<NewsMap> logger)
     {
         try
         {
             var listAll = await service.GetAllNewsAsync();
 
-            return listAll.IsSuccess ? TypedResults.Ok(listAll.Value) : TypedResults.Ok(new List<News>());
+            return listAll.IsSuccess ? TypedResults.Ok(listAll.Value) : TypedResults.Ok(new List<HackNewsDto>());
         }
         catch (Exception ex)
         {
@@ -33,7 +33,7 @@ public class NewsMap
 
     }
 
-    public static async Task<Results<Ok<List<News>>, BadRequest<Exception>>> GetByNumberAsync([FromServices] INewsService service, [FromRoute] int number, ILogger<NewsMap> logger)
+    public static async Task<Results<Ok<List<HackNewsDto>>, BadRequest<Exception>>> GetByNumberAsync([FromServices] INewsService service, [FromRoute] int number, ILogger<NewsMap> logger)
     {
         try
         {
@@ -53,7 +53,7 @@ public class NewsMap
         }
     }
 
-    public static async Task<Results<Ok<News>, BadRequest<Exception>>> GetByIdAsync([FromServices] INewsService service, string id, ILogger<NewsMap> logger)
+    public static async Task<Results<Ok<HackNewsDto>, BadRequest<Exception>>> GetByIdAsync([FromServices] INewsService service, string id, ILogger<NewsMap> logger)
     {
         try
         {

@@ -1,4 +1,6 @@
-﻿using Challenge.Domain.Interfaces;
+﻿using Challenge.Application.Dto;
+using Challenge.Application.Interfaces;
+using Challenge.Domain.Interfaces;
 using Challenge.Domain.Models;
 using Challenge.Domain.Models.Results;
 using Challenge.Infra.Client;
@@ -37,7 +39,7 @@ public class NewsService : INewsService
     }
 
     //CacheAside
-    public async Task<Result<List<News>>> GetNewsTakeNumber(int number)
+    public async Task<Result<List<HackNewsDto>>> GetNewsTakeNumber(int number)
     {
         var result = new List<News>();
         try
@@ -60,7 +62,7 @@ public class NewsService : INewsService
             }
 
             result = listCache.Value
-                .OrderBy(c => c.Time)
+                .OrderByDescending(c => c.Score)
                 .Take(number)
                 .ToList();
 
@@ -70,11 +72,11 @@ public class NewsService : INewsService
             _logger.LogError(ex, ex.Message);
         }
 
-        return Result<List<News>>.Ok(result);
+        return Result<List<HackNewsDto>>.Ok(result.ToDto());
     }
 
     //CacheAside
-    public async Task<Result<List<News>>> GetAllNewsAsync()
+    public async Task<Result<List<HackNewsDto>>> GetAllNewsAsync()
     {
         var result = new List<News>();
         try
@@ -101,11 +103,11 @@ public class NewsService : INewsService
             _logger.LogError(ex, ex.Message);
         }
 
-        return Result<List<News>>.Ok(result);
+        return Result<List<HackNewsDto>>.Ok(result.ToDto());
     }
 
     //Cache aside
-    public async Task<Result<News>> GetNewsByIDAsync(int Id)
+    public async Task<Result<HackNewsDto>> GetNewsByIDAsync(int Id)
     {
         var result = new News();
 
@@ -125,6 +127,6 @@ public class NewsService : INewsService
             throw;
         }
 
-        return Result<News>.Ok(result);
+        return Result<HackNewsDto>.Ok(result.ToDto());
     }
 }

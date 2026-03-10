@@ -1,4 +1,5 @@
 ﻿using Challenge.Application.Handlers;
+using Challenge.Application.Interfaces;
 using Challenge.Application.Services;
 using Challenge.Domain.Interfaces;
 using Challenge.Infra.Cache;

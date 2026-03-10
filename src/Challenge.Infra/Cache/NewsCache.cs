@@ -24,7 +24,8 @@ public class NewsCache : INewsCache
     public async Task<Result<IEnumerable<int>>> GetAllBestStoriesAsync()
     {
         var result = Enumerable.Empty<int>();
-        result = _stackBestStories.ToList();
+        result = _stackBestStories
+            .ToList();
         return Result<IEnumerable<int>>.Ok(result);
     }
 
@@ -32,7 +33,8 @@ public class NewsCache : INewsCache
     {
         var result = Enumerable.Empty<News>();
 
-        result = _dicHackNews.Values.ToList();
+        result = _dicHackNews.Values.ToList()
+            .OrderByDescending(c => c.Score);
 
         return Result<IEnumerable<News>>.Ok(result);
     }
